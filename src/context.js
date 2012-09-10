@@ -9,48 +9,38 @@ cubism.context = function() {
       event = d3.dispatch("prepare", "beforechange", "change", "focus"),
       scale = context.scale = d3.time.scale().range([0, size]),
       timeout,
-      focus;
+      focus,
+      subjectiveClock,
+      subjectiveTime = Date.now(),
+      subjectiveNow = function() { return subjectiveTime; };
 
+  //this is run after a systemic, context-wide change, like context.step() or .size()
+  //this is NOT run every tick.
   function update() {
-    var now = Date.now();
-    stop0 = new Date(Math.floor((now - serverDelay - clientDelay) / step) * step);
-    start0 = new Date(stop0 - size * step);
-    stop1 = new Date(Math.floor((now - serverDelay) / step) * step);
-    start1 = new Date(stop1 - size * step);
+    var now = subjectiveNow();
+    stop0 = new Date(Math.floor((now - serverDelay - clientDelay) / step) * step);//now
+    start0 = new Date(stop0 - size * step); //context length ago
+    stop1 = new Date(Math.floor((now - serverDelay) / step) * step); //end of next requested slice
+    start1 = new Date(stop1 - size * step); //beginning of next requested slice NOTE LENGTH=SIZE*STEP
     scale.domain([start0, stop0]);
     return context;
   }
 
-  context.start = function() {
-    if (timeout) clearTimeout(timeout);
-    var delay = +stop1 + serverDelay - Date.now();
+  context.shift = function() {
+    stop1 = new Date(Math.floor((subjectiveNow() - serverDelay) / step) * step);
+    start1 = new Date(stop1 - size * step);
+    //NOTE SIZE * STEP (a metric buttload of data in other words).
+    //These are NOT the boundaries of the slice passed into the request function, they're
+    // far too far apart.  Rather, in the prepare function called by the prepare event
+    //below, they're shrunk to a more sane dimension
 
-    // If we're too late for the first prepare event, skip it.
-    if (delay < clientDelay) delay += step;
-
-    timeout = setTimeout(function prepare() {
-      stop1 = new Date(Math.floor((Date.now() - serverDelay) / step) * step);
-      start1 = new Date(stop1 - size * step);
-      event.prepare.call(context, start1, stop1);
-
-      setTimeout(function() {
-        scale.domain([start0 = start1, stop0 = stop1]);
-        event.beforechange.call(context, start1, stop1);
-        event.change.call(context, start1, stop1);
-        event.focus.call(context, focus);
-      }, clientDelay);
-
-      timeout = setTimeout(prepare, step);
-    }, delay);
-    return context;
+    event.prepare.call(context, start1, stop1);
+    scale.domain([start0 = start1, stop0 = stop1]);
+    event.beforechange.call(context, start1, stop1);
+    event.change.call(context, start1, stop1);
+    event.focus.call(context, focus);
   };
 
-  context.stop = function() {
-    timeout = clearTimeout(timeout);
-    return context;
-  };
-
-  timeout = setTimeout(context.start, 10);
 
   // Set or get the step interval in milliseconds.
   // Defaults to ten seconds.
@@ -75,6 +65,18 @@ cubism.context = function() {
     if (!arguments.length) return serverDelay;
     serverDelay = +_;
     return update();
+  };
+
+  context.subjectiveClock = function(clock) {
+    if (!arguments.length)
+      return subjectiveClock;
+    subjectiveClock = clock;
+    subjectiveNow=clock.getTime;
+    return update();
+  };
+
+  context.setTime = function (date) {
+    subjectiveTime = date;
   };
 
   // The client delay is the amount of additional time we wait to fetch those

@@ -26,6 +26,7 @@ cubism_contextPrototype.axis = function() {
           .text(null);
     });
 
+    // axis display here
     context.on("focus.axis-" + id, function(i) {
       if (tick) {
         if (i == null) {

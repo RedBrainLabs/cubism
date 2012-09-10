@@ -17,6 +17,9 @@ cubism_metricPrototype.alias = function(name) {
 };
 
 cubism_metricPrototype.extent = function() {
+  // This is to find the upper/lowerbound of all values in the
+  // metric (i.e. the ones that will be shown on the canvas @ any one
+  // time)
   var i = 0,
       n = this.context.size(),
       value,
@@ -58,9 +61,19 @@ cubism_contextPrototype.metric = function(request, name) {
   // Prefetch new data into a temporary array.
   function prepare(start1, stop) {
     var steps = Math.min(size, Math.round((start1 - start) / step));
+    /* right here is where the magic happens: start1 is the first time
+       VISIBLE ON THE GRAPH, ALWAYS, contrary to whatever impressions
+       you may have from "start" being the beginning of the period
+       requested in the request function. start, meanwhile, is either
+       -Infinity (set as such when the context is initialized), or
+       start1 - step (start is changed to start1 [which is later
+       incremented by step] every tick) so the trick is taking the
+       difference at the beginning... */
+
     if (!steps || fetching) return; // already fetched, or fetching!
     fetching = true;
     steps = Math.min(size, steps + cubism_metricOverlap);
+    //...and using the scalar at the end.
     var start0 = new Date(stop - steps * step);
     request(start0, stop, step, function(error, data) {
       fetching = false;
