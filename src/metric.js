@@ -92,9 +92,18 @@ cubism_contextPrototype.metric = function(request, name) {
     stop = stop1;
   }
 
-  //
-  metric.valueAt = function(i) {
-    return values[i];
+  //warning: kind of dirty, were this to be a long-term canonical change to cubism, would probably think this over better.
+  metric.valueAt = function(i,key) {
+    v = values[i]
+    if (arguments.length==1){
+      if (typeof v == "number" || v == undefined){
+        return v;
+      }
+      else{
+        return v["value"];
+      }
+    }
+    return v[key];
   };
 
   //
