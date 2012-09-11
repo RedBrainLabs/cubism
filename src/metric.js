@@ -27,8 +27,10 @@ cubism_metricPrototype.extent = function() {
       max = -Infinity;
   while (++i < n) {
     value = this.valueAt(i);
-    if (value < min) min = value;
-    if (value > max) max = value;
+    if (value != Infinity && value != -Infinity){
+      if (value < min) min = value;
+      if (value > max) max = value;
+    }
   }
   return [min, max];
 };
