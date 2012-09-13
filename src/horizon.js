@@ -11,6 +11,14 @@ cubism_contextPrototype.horizon = function() {
       format = d3.format(".2s"),
       colors = ["#08519c","#3182bd","#6baed6","#bdd7e7","#bae4b3","#74c476","#31a354","#006d2c"];
 
+  function shiftViaCopy(context, dx) {
+    var canvas0 = buffer.getContext("2d");
+    canvas0.clearRect(0, 0, width, height);
+    canvas0.drawImage(context.canvas, dx, 0, width - dx, height, 0, 0, width - dx, height);
+    context.clearRect(0, 0, width, height);
+    context.drawImage(canvas0.canvas, 0, 0);
+  }
+
   function horizon(selection) {
 
     selection
@@ -59,13 +67,7 @@ cubism_contextPrototype.horizon = function() {
           if (max == max_) {
             i0 = width - cubism_metricOverlap;
             var dx = (start1 - start) / step;
-            if (dx < width) {
-              var canvas0 = buffer.getContext("2d");
-              canvas0.clearRect(0, 0, width, height);
-              canvas0.drawImage(canvas.canvas, dx, 0, width - dx, height, 0, 0, width - dx, height);
-              canvas.clearRect(0, 0, width, height);
-              canvas.drawImage(canvas0.canvas, 0, 0);
-            }
+            if (dx < width) shiftViaCopy(canvas, dx);
           }
           start = start1;
         }
