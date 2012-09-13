@@ -65,8 +65,8 @@ cubism_contextPrototype.horizon = function() {
         var i0 = 0, max = Math.max(-extent[0], extent[1]);
         if (this === context) {
           if (max == max_) {
-            i0 = width - cubism_metricOverlap;
             var dx = (start1 - start) / step;
+            i0 = Math.max(0, width - Math.max(cubism_metricOverlap, dx));
             if (dx < width) shiftViaCopy(canvas, dx);
           }
           start = start1;
