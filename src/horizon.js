@@ -41,6 +41,9 @@ cubism_contextPrototype.horizon = function() {
       var that = this,
       id = ++cubism_id,
       metric_ = typeof metric === "function" ? metric.call(that, d, i) : metric,
+
+  .call(that, d, i) : metric,
+
       colors_ = typeof colors === "function" ? colors.call(that, d, i) : colors,
       extent_ = typeof extent === "function" ? extent.call(that, d, i) : extent,
       start = -Infinity,
@@ -137,14 +140,16 @@ cubism_contextPrototype.horizon = function() {
           }
         }
         else{
-          var displayed_values = {}
+          var hover_values = {}
           for (key in hoverFormat.keys){
-            display_values[key] = metric_valueAt(i,key);
+            hover_values[key] = metric_valueAt(i,key);
           }
           var re = /#{([\w_]+)}/g;
-          var display_text = hoverFormat.frame_string.replace(re, function(match, subgroup1){
-            return hoverFormat[subgroup1](display_values[subgroup1])})
-          span.text(display_text);
+
+          var hover_text = hoverFormat.frame_string.replace(re, function(match, subgroup){
+            return hoverFormat[subgroup](hover_values[subgroup])})
+
+          span.text(hover_text);
         }
       }
 
