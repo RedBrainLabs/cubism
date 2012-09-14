@@ -9,7 +9,7 @@ cubism_contextPrototype.horizon = function() {
   extent = null,
   title = cubism_identity,
   format = d3.format(".2s"),
-  displayFormat = null;
+  hoverFormat = null;
   colors = ["#08519c","#3182bd","#6baed6","#bdd7e7","#bae4b3","#74c476","#31a354","#006d2c"];
 
   function shiftViaCopy(context, dx) {
@@ -127,7 +127,7 @@ cubism_contextPrototype.horizon = function() {
 
       function focus(i) {
         if (i == null) i = width - 1;
-        if (displayFormat == null){
+        if (hoverFormat == null){
           var value = metric_.valueAt(i);
           if(typeof value == "number"){
             span.datum(value).text(isNaN(value) ? null : format); 
@@ -138,12 +138,12 @@ cubism_contextPrototype.horizon = function() {
         }
         else{
           var displayed_values = {}
-          for (key in displayFormat.keys){
+          for (key in hoverFormat.keys){
             display_values[key] = metric_valueAt(i,key);
           }
-          re = /#{([\w_]+)}/g;
-          display_text = displayFormat.frame_string.replace(re, function(match, subgroup1){
-            return displayFormat[subgroup1](display_values[subgroup1])})
+          var re = /#{([\w_]+)}/g;
+          var display_text = hoverFormat.frame_string.replace(re, function(match, subgroup1){
+            return hoverFormat[subgroup1](display_values[subgroup1])})
           span.text(display_text);
         }
       }
@@ -189,8 +189,8 @@ cubism_contextPrototype.horizon = function() {
     return horizon;
   };
 
-  horizon.displayFormat = function(_){
-    if (!arguments.length) return displayFormat;
+  horizon.hoverFormat = function(_){
+    if (!arguments.length) return hoverFormat;
     return horizon;
   }
 
