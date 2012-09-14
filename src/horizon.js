@@ -128,10 +128,12 @@ cubism_contextPrototype.horizon = function() {
         if (i == null) i = width - 1;
         var value = metric_.valueAt(i);
 
-//        if(typeof value == "number"){
-//        span.datum(value).text(isNaN(value) ? null : format); //to be changed
-//        }
-        span.datum(value).text(isNaN(value) ? null : format);
+        if(typeof value == "number"){
+          span.datum(value).text(isNaN(value) ? null : format); 
+        }
+        else{//TARGET
+          span.datum(value).text(isNaN(value) ? null : format);
+        }
       }
 
       // Update the chart when the context changes.
