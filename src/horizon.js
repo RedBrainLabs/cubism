@@ -1,15 +1,16 @@
 cubism_contextPrototype.horizon = function() {
   var context = this,
-      mode = "offset",
-      buffer = document.createElement("canvas"),
-      width = buffer.width = context.size(),
-      height = buffer.height = 30,
-      scale = d3.scale.linear().interpolate(d3.interpolateRound),
-      metric = cubism_identity,
-      extent = null,
-      title = cubism_identity,
-      format = d3.format(".2s"),
-      colors = ["#08519c","#3182bd","#6baed6","#bdd7e7","#bae4b3","#74c476","#31a354","#006d2c"];
+  mode = "offset",
+  buffer = document.createElement("canvas"),
+  width = buffer.width = context.size(),
+  height = buffer.height = 30,
+  scale = d3.scale.linear().interpolate(d3.interpolateRound),
+  metric = cubism_identity,
+  extent = null,
+  title = cubism_identity,
+  format = d3.format(".2s"),
+  displayFormat = null;
+  colors = ["#08519c","#3182bd","#6baed6","#bdd7e7","#bae4b3","#74c476","#31a354","#006d2c"];
 
   function shiftViaCopy(context, dx) {
     var canvas0 = buffer.getContext("2d");
@@ -22,33 +23,33 @@ cubism_contextPrototype.horizon = function() {
   function horizon(selection) {
 
     selection
-        .on("mousemove.horizon", function() { context.focus(Math.round(d3.mouse(this)[0])); })
-        .on("mouseout.horizon", function() { context.focus(null); });
+      .on("mousemove.horizon", function() { context.focus(Math.round(d3.mouse(this)[0])); })
+      .on("mouseout.horizon", function() { context.focus(null); });
 
     selection.append("canvas")
-        .attr("width", width)
-        .attr("height", height);
+      .attr("width", width)
+      .attr("height", height);
 
     selection.append("span")
-        .attr("class", "title")
-        .text(title);
+      .attr("class", "title")
+      .text(title);
 
     selection.append("span")
-        .attr("class", "value");
+      .attr("class", "value");
 
     selection.each(function(d, i) {
       var that = this,
-          id = ++cubism_id,
-          metric_ = typeof metric === "function" ? metric.call(that, d, i) : metric,
-          colors_ = typeof colors === "function" ? colors.call(that, d, i) : colors,
-          extent_ = typeof extent === "function" ? extent.call(that, d, i) : extent,
-          start = -Infinity,
-          step = context.step(),
-          canvas = d3.select(that).select("canvas"),
-          span = d3.select(that).select(".value"),
-          max_,
-          m = colors_.length >> 1,
-          ready;
+      id = ++cubism_id,
+      metric_ = typeof metric === "function" ? metric.call(that, d, i) : metric,
+      colors_ = typeof colors === "function" ? colors.call(that, d, i) : colors,
+      extent_ = typeof extent === "function" ? extent.call(that, d, i) : extent,
+      start = -Infinity,
+      step = context.step(),
+      canvas = d3.select(that).select("canvas"),
+      span = d3.select(that).select(".value"),
+      max_,
+      m = colors_.length >> 1,
+      ready;
 
       canvas.datum({id: id, metric: metric_});
       canvas = canvas.node().getContext("2d");
@@ -126,13 +127,24 @@ cubism_contextPrototype.horizon = function() {
 
       function focus(i) {
         if (i == null) i = width - 1;
-        var value = metric_.valueAt(i);
-
-        if(typeof value == "number"){
-          span.datum(value).text(isNaN(value) ? null : format); 
+        if (displayFormat == null){
+          var value = metric_.valueAt(i);
+          if(typeof value == "number"){
+            span.datum(value).text(isNaN(value) ? null : format); 
+          }
+          else{//TARGET
+            span.datum(value).text(isNaN(value) ? null : format);
+          }
         }
-        else{//TARGET
-          span.datum(value).text(isNaN(value) ? null : format);
+        else{
+          var displayed_values = {}
+          for (key in displayFormat.keys){
+            display_values[key] = metric_valueAt(i,key);
+          }
+          re = /#{([\w_]+)}/g;
+          display_text = displayFormat.frame_string.replace(re, function(match, subgroup1){
+            return displayFormat[subgroup1](display_values[subgroup1])})
+          span.text(display_text);
         }
       }
 
@@ -154,15 +166,15 @@ cubism_contextPrototype.horizon = function() {
   horizon.remove = function(selection) {
 
     selection
-        .on("mousemove.horizon", null)
-        .on("mouseout.horizon", null);
+      .on("mousemove.horizon", null)
+      .on("mouseout.horizon", null);
 
     selection.selectAll("canvas")
-        .each(remove)
+      .each(remove)
         .remove();
 
     selection.selectAll(".title,.value")
-        .remove();
+      .remove();
 
     function remove(d) {
       d.metric.on("change.horizon-" + d.id, null);
@@ -176,6 +188,11 @@ cubism_contextPrototype.horizon = function() {
     mode = _ + "";
     return horizon;
   };
+
+  horizon.displayFormat = function(_){
+    if (!arguments.length) return displayFormat;
+    return horizon;
+  }
 
   horizon.height = function(_) {
     if (!arguments.length) return height;
