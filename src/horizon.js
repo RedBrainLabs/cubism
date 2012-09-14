@@ -1,46 +1,4 @@
-cubism_contextPrototype.horizon = function() {
-  var context = this,
-  mode = "offset",
-  buffer = document.createElement("canvas"),
-  width = buffer.width = context.size(),
-  height = buffer.height = 30,
-  scale = d3.scale.linear().interpolate(d3.interpolateRound),
-  metric = cubism_identity,
-  extent = null,
-  title = cubism_identity,
-  format = d3.format(".2s"),
-  displayFormat = null;
-  colors = ["#08519c","#3182bd","#6baed6","#bdd7e7","#bae4b3","#74c476","#31a354","#006d2c"];
-
-  function shiftViaCopy(context, dx) {
-    var canvas0 = buffer.getContext("2d");
-    canvas0.clearRect(0, 0, width, height);
-    canvas0.drawImage(context.canvas, dx, 0, width - dx, height, 0, 0, width - dx, height);
-    context.clearRect(0, 0, width, height);
-    context.drawImage(canvas0.canvas, 0, 0);
-  }
-
-  function horizon(selection) {
-
-    selection
-      .on("mousemove.horizon", function() { context.focus(Math.round(d3.mouse(this)[0])); })
-      .on("mouseout.horizon", function() { context.focus(null); });
-
-    selection.append("canvas")
-      .attr("width", width)
-      .attr("height", height);
-
-    selection.append("span")
-      .attr("class", "title")
-      .text(title);
-
-    selection.append("span")
-      .attr("class", "value");
-
-    selection.each(function(d, i) {
-      var that = this,
-      id = ++cubism_id,
-      metric_ = typeof metric === "function" ? metric.call(that, d, i) : metric,
+  .call(that, d, i) : metric,
       colors_ = typeof colors === "function" ? colors.call(that, d, i) : colors,
       extent_ = typeof extent === "function" ? extent.call(that, d, i) : extent,
       start = -Infinity,
@@ -141,8 +99,8 @@ cubism_contextPrototype.horizon = function() {
           for (key in displayFormat.keys){
             display_values[key] = metric_valueAt(i,key);
           }
-          re = /#{([\w_]+)}/g;
-          display_text = displayFormat.frame_string.replace(re, function(match, subgroup1){
+          var re = /#{([\w_]+)}/g;
+          var display_text = displayFormat.frame_string.replace(re, function(match, subgroup1){
             return displayFormat[subgroup1](display_values[subgroup1])})
           span.text(display_text);
         }
