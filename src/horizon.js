@@ -41,9 +41,6 @@ cubism_contextPrototype.horizon = function() {
       var that = this,
       id = ++cubism_id,
       metric_ = typeof metric === "function" ? metric.call(that, d, i) : metric,
-
-  .call(that, d, i) : metric,
-
       colors_ = typeof colors === "function" ? colors.call(that, d, i) : colors,
       extent_ = typeof extent === "function" ? extent.call(that, d, i) : extent,
       start = -Infinity,
