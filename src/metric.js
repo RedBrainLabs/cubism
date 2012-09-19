@@ -21,10 +21,10 @@ cubism_metricPrototype.extent = function() {
   // metric (i.e. the ones that will be shown on the canvas @ any one
   // time)
   var i = 0,
-      n = this.context.size(),
-      value,
-      min = Infinity,
-      max = -Infinity;
+  n = this.context.size(),
+  value,
+  min = Infinity,
+  max = -Infinity;
   while (++i < n) {
     value = this.valueAt(i);
     if (value < min) min = value;
@@ -45,18 +45,19 @@ cubism_metricPrototype.on = function() {
   return arguments.length < 2 ? null : this;
 };
 
-cubism_contextPrototype.metric = function(request, name, displayFormat) {
+cubism_contextPrototype.metric = function(request, name, textualFormat) {
   var context = this,
-      metric = new cubism_metric(context),
-      id = ".metric-" + ++cubism_id,
-      start = -Infinity,
-      stop,
-      step = context.step(),
-      size = context.size(),
-      values = [],
-      event = d3.dispatch("change"),
-      listening = 0,
-      fetching;
+  metric = new cubism_metric(context),
+  id = ".metric-" + ++cubism_id,
+  start = -Infinity,
+  stop,
+  step = context.step(),
+  size = context.size(),
+  values = [],
+  event = d3.dispatch("change"),
+  listening = 0,
+  textualFormat=textualFormat,
+  fetching;
 
   // Prefetch new data into a temporary array.
   function prepare(start1, stop) {
@@ -91,6 +92,11 @@ cubism_contextPrototype.metric = function(request, name, displayFormat) {
     start = start1;
     stop = stop1;
   }
+
+  metric.getTextualFormat=function(){
+    return textualFormat;
+  }
+
 
   //warning: kind of dirty, were this to be a long-term canonical change to cubism, would probably think this over better.
   metric.valueAt = function(i,key) {

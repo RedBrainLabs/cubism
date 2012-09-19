@@ -49,6 +49,7 @@ cubism_contextPrototype.horizon = function() {
       span = d3.select(that).select(".value"),
       max_,
       m = colors_.length >> 1,
+      hoverFormat = metric_.getTextualFormat(),
       ready;
 
       canvas.datum({id: id, metric: metric_});
@@ -144,6 +145,7 @@ cubism_contextPrototype.horizon = function() {
           var re = /#{([\w_]+)}/g;
 
           var hover_text = hoverFormat.frame_string.replace(re, function(match, subgroup){
+            if (hover_values[subgroup] == "NaN") return hoverFormat.keys[subgroup](undefined);
             return hoverFormat.keys[subgroup](hover_values[subgroup])})
 
           span.text(hover_text);
@@ -190,16 +192,6 @@ cubism_contextPrototype.horizon = function() {
     mode = _ + "";
     return horizon;
   };
-
-  horizon.hoverFormat = function(_){
-    if (!arguments.length){
-      return hoverFormat;
-    }
-    else{
-      hoverFormat = _;
-      return horizon;
-    }
-  }
 
   horizon.height = function(_) {
     if (!arguments.length) return height;
