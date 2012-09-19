@@ -139,12 +139,12 @@ cubism_contextPrototype.horizon = function() {
         else{
           var hover_values = {}
           for (key in hoverFormat.keys){
-            hover_values[key] = metric_valueAt(i,key);
+            hover_values[key] = metric_.valueAt(i,key);
           }
           var re = /#{([\w_]+)}/g;
 
           var hover_text = hoverFormat.frame_string.replace(re, function(match, subgroup){
-            return hoverFormat[subgroup](hover_values[subgroup])})
+            return hoverFormat.keys[subgroup](hover_values[subgroup])})
 
           span.text(hover_text);
         }
@@ -192,8 +192,13 @@ cubism_contextPrototype.horizon = function() {
   };
 
   horizon.hoverFormat = function(_){
-    if (!arguments.length) return hoverFormat;
-    return horizon;
+    if (!arguments.length){
+      return hoverFormat;
+    }
+    else{
+      hoverFormat = _;
+      return horizon;
+    }
   }
 
   horizon.height = function(_) {

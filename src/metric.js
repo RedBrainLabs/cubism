@@ -45,7 +45,7 @@ cubism_metricPrototype.on = function() {
   return arguments.length < 2 ? null : this;
 };
 
-cubism_contextPrototype.metric = function(request, name) {
+cubism_contextPrototype.metric = function(request, name, displayFormat) {
   var context = this,
       metric = new cubism_metric(context),
       id = ".metric-" + ++cubism_id,
@@ -103,7 +103,12 @@ cubism_contextPrototype.metric = function(request, name) {
         return v["value"];
       }
     }
-    return v[key];
+    if (v == undefined){
+      return undefined;
+    }
+    else{
+      return v[key];
+    }
   };
 
   //
