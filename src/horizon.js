@@ -7,8 +7,8 @@ cubism_contextPrototype.horizon = function() {
   scale = d3.scale.linear().interpolate(d3.interpolateRound),
   metric = cubism_identity,
   extent = null,
+  default_format = d3.format(".2s"),
   title = cubism_identity,
-  format = d3.format(".2s"),
   hoverFormat = null;
   colors = ["#08519c","#3182bd","#6baed6","#bdd7e7","#bae4b3","#74c476","#31a354","#006d2c"];
 
@@ -49,7 +49,7 @@ cubism_contextPrototype.horizon = function() {
       span = d3.select(that).select(".value"),
       max_,
       m = colors_.length >> 1,
-      hoverFormat = metric_.getTextualFormat(),
+      format = (metric_.format() == undefined || metric_.format() == null) ? default_format : metric_.format(),
       ready;
 
       canvas.datum({id: id, metric: metric_});
@@ -128,29 +128,10 @@ cubism_contextPrototype.horizon = function() {
 
       function focus(i) {
         if (i == null) i = width - 1;
-        if (hoverFormat == null){
-          var value = metric_.valueAt(i);
-          if(typeof value == "number"){
-            span.datum(value).text(isNaN(value) ? null : format); 
-          }
-          else{//TARGET
-            span.datum(value).text(isNaN(value) ? null : format);
-          }
-        }
-        else{
-          var hover_values = {}
-          for (key in hoverFormat.keys){
-            hover_values[key] = metric_.valueAt(i,key);
-          }
-          var re = /#{([\w_]+)}/g;
-
-          var hover_text = hoverFormat.frame_string.replace(re, function(match, subgroup){
-            if (hover_values[subgroup] == "NaN") return hoverFormat.keys[subgroup](undefined);
-            return hoverFormat.keys[subgroup](hover_values[subgroup])})
-
-          span.text(hover_text);
-        }
+        var value = metric_.specificValueAt(i,"__all__")
+        span.datum(value).text(value ? format : null);
       }
+
 
       // Update the chart when the context changes.
       context.on("change.horizon-" + id, change);

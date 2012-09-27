@@ -45,7 +45,7 @@ cubism_metricPrototype.on = function() {
   return arguments.length < 2 ? null : this;
 };
 
-cubism_contextPrototype.metric = function(request, name, textualFormat) {
+cubism_contextPrototype.metric = function(request, name) {
   var context = this,
   metric = new cubism_metric(context),
   id = ".metric-" + ++cubism_id,
@@ -56,7 +56,7 @@ cubism_contextPrototype.metric = function(request, name, textualFormat) {
   values = [],
   event = d3.dispatch("change"),
   listening = 0,
-  textualFormat=textualFormat,
+  format,
   fetching;
 
   // Prefetch new data into a temporary array.
@@ -93,29 +93,20 @@ cubism_contextPrototype.metric = function(request, name, textualFormat) {
     stop = stop1;
   }
 
-  metric.getTextualFormat=function(){
-    return textualFormat;
+  metric.format = function(_) {
+    if (!arguments.length) return format;
+    format = _;
+    return metric;
+  };
+
+  metric.specificValueAt = function(i,key){
+    return (key == "__all__") ? values[i] : values[i][key]
   }
 
-
-  //warning: kind of dirty, were this to be a long-term canonical change to cubism, would probably think this over better.
-  metric.valueAt = function(i,key) {
-    v = values[i]
-    if (arguments.length==1){
-      if (typeof v == "number" || v == undefined){
-        return v;
-      }
-      else{
-        return v["value"];
-      }
-    }
-    if (v == undefined){
-      return undefined;
-    }
-    else{
-      return v[key];
-    }
-  };
+  metric.valueAt = function(i){
+    var v = values[i];
+    return (typeof v != "number" && v != undefined) ? v["value"] : v
+  }
 
   //
   metric.shift = function(offset) {
